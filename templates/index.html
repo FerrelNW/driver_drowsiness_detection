@@ -1,0 +1,792 @@
+ <!-- new ui design -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Drowsiness Detection System</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border-radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 24px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        .dashboard {
+            display: flex;
+            gap: 24px;
+            min-height: 70vh;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard {
+                flex-direction: column;
+            }
+        }
+        
+        /* Camera Section - Lebih Luas */
+        .camera-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .camera-container {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .camera-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .camera-header h2 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .camera-feed {
+            flex: 1;
+            position: relative;
+            min-height: 500px;
+            background: #000;
+        }
+        
+        .camera-feed img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .camera-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.warning { background: var(--warning); }
+        .status-dot.danger { 
+            background: var(--danger); 
+            animation: pulse-danger 1s infinite; 
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes pulse-danger {
+            0%, 100% { 
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% { 
+                opacity: 0.8;
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+        
+        .performance-stats {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Controls Section - Lebih Compact */
+        .controls-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            min-width: 350px;
+        }
+        
+        .control-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group {
+            margin-bottom: 24px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-group h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover:not(:disabled) {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Alert Panel */
+        .alert-panel {
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-left: 4px solid var(--danger);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .alert-panel.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+        
+        .alert-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+        }
+        
+        .icon {
+            font-size: 1.2rem;
+        }
+        
+        .small-icon {
+            font-size: 1rem;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 Driver Drowsiness Detection System</h1>
+            <p class="subtitle">Sistem monitoring real-time untuk keselamatan pengemudi</p>
+        </header>
+        
+        <div class="dashboard">
+            <!-- Camera Section (Lebih Luas) -->
+            <div class="camera-section">
+                <div class="camera-container">
+                    <div class="camera-header">
+                        <h2><span class="icon">📷</span> Live Camera Feed</h2>
+                        <div class="camera-status">
+                            <div class="status-dot" id="statusDot"></div>
+                            <span id="statusText">Memulai sistem...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="camera-feed">
+                        <img src="{{ url_for('video_feed') }}" alt="Live Camera Feed" id="videoFeed">
+                        <div class="camera-overlay">
+                            <div class="stat-item">
+                                <span class="stat-label">Resolusi:</span>
+                                <span class="stat-value" id="resolutionInfo">640x480</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">FPS:</span>
+                                <span class="stat-value" id="fpsCounter">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="performance-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Frame diproses:</span>
+                            <span class="stat-value" id="frameCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Deteksi wajah:</span>
+                            <span class="stat-value" id="faceDetectionStatus">Tidak aktif</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Waktu respon:</span>
+                            <span class="stat-value" id="responseTime">0ms</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alert Panel di bawah camera -->
+                <div id="alertPanel" class="alert-panel">
+                    <div class="alert-header">
+                        <span class="alert-icon">⚠️</span>
+                        <strong>PERINGATAN: KANTUK TERDETEKSI!</strong>
+                    </div>
+                    <div class="alert-content">
+                        Sistem mendeteksi tanda-tanda kelelahan pada pengemudi. Alarm akan berbunyi untuk memberikan peringatan.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controls Section (Compact di Kanan) -->
+            <div class="controls-section">
+                <!-- System Control Card -->
+                <div class="control-card">
+                    <h2><span class="icon">⚙️</span> Kontrol Sistem</h2>
+                    
+                    <div class="control-group">
+                        <h3>Aktifkan Alarm</h3>
+                        <button id="enableAudioBtn" class="btn btn-primary">
+                            <span class="icon">🔊</span> Aktifkan Sistem Alarm
+                        </button>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 8px;">
+                            Klik untuk mengizinkan pemutaran alarm otomatis saat terdeteksi kantuk.
+                        </p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Status Deteksi</h3>
+                        <div class="metric-card">
+                            <div class="metric-value" id="detectionStatus">- -</div>
+                            <div class="metric-label">Status Saat Ini</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Metrics Card -->
+                <div class="control-card">
+                    <h2><span class="icon">📊</span> Metrics</h2>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-value" id="earValue">0.00</div>
+                            <div class="metric-label">EAR Score</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="drowsyCount">0</div>
+                            <div class="metric-label">Deteksi Kantuk</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="sessionTime">0s</div>
+                            <div class="metric-label">Durasi Session</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="accuracyScore">-</div>
+                            <div class="metric-label">Akurasi</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testing Card -->
+                <div class="control-card">
+                    <h2><span class="icon">🧪</span> Testing & Simulasi</h2>
+                    
+                    <div class="control-group">
+                        <button id="simulateDrowsyBtn" class="btn btn-warning" disabled>
+                            <span class="icon">👁️</span> Simulasi Deteksi Kantuk
+                        </button>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 8px;">
+                            Uji sistem dengan simulasi kondisi mengantuk selama 5 detik.
+                        </p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button id="resetStatsBtn" class="btn">
+                            <span class="icon">🔄</span> Reset Statistik
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Driver Drowsiness Detection System © 2024 | Prototype untuk Tugas Akhir Deep Learning</p>
+            <p style="margin-top: 5px; font-size: 0.8rem; opacity: 0.7;">Sistem menggunakan MediaPipe Face Mesh untuk deteksi EAR (Eye Aspect Ratio)</p>
+        </footer>
+    </div>
+
+    <audio id="alarmSound" loop>
+        <source src="{{ url_for('static', filename='audio/beep-alarm.mp3') }}" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    <script>
+        // Elements
+        const alarm = document.getElementById('alarmSound');
+        const enableAudioBtn = document.getElementById('enableAudioBtn');
+        const simulateBtn = document.getElementById('simulateDrowsyBtn');
+        const resetStatsBtn = document.getElementById('resetStatsBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const detectionStatus = document.getElementById('detectionStatus');
+        const earValue = document.getElementById('earValue');
+        const frameCount = document.getElementById('frameCount');
+        const fpsCounter = document.getElementById('fpsCounter');
+        const alertPanel = document.getElementById('alertPanel');
+        const videoFeed = document.getElementById('videoFeed');
+        const resolutionInfo = document.getElementById('resolutionInfo');
+        const faceDetectionStatus = document.getElementById('faceDetectionStatus');
+        const responseTime = document.getElementById('responseTime');
+        const drowsyCount = document.getElementById('drowsyCount');
+        const sessionTime = document.getElementById('sessionTime');
+        const accuracyScore = document.getElementById('accuracyScore');
+        
+        // State
+        let isAudioEnabled = false;
+        let frameCounter = 0;
+        let lastUpdateTime = Date.now();
+        let fps = 0;
+        let isSimulating = false;
+        let simulationTimeout = null;
+        let sessionStartTime = Date.now();
+        let totalDrowsyDetections = 0;
+        let lastResponseTime = Date.now();
+        
+        // Initialize metrics
+        function initMetrics() {
+            updateSessionTime();
+            setInterval(updateSessionTime, 1000);
+            updateFPSCounter();
+        }
+        
+        // Update session time
+        function updateSessionTime() {
+            const elapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+            sessionTime.textContent = `${elapsedSeconds}s`;
+        }
+        
+        // FPS Counter
+        function updateFPSCounter() {
+            frameCounter++;
+            const now = Date.now();
+            const elapsed = now - lastUpdateTime;
+            
+            if (elapsed >= 500) {
+                fps = Math.round((frameCounter * 1000) / elapsed);
+                fpsCounter.textContent = fps;
+                frameCount.textContent = parseInt(frameCount.textContent) + frameCounter;
+                frameCounter = 0;
+                lastUpdateTime = now;
+            }
+            
+            // Update response time
+            const currentResponseTime = Date.now() - lastResponseTime;
+            responseTime.textContent = `${currentResponseTime}ms`;
+            
+            requestAnimationFrame(updateFPSCounter);
+        }
+        
+        // Enable Audio System
+        enableAudioBtn.addEventListener('click', () => {
+            alarm.play().then(() => {
+                alarm.pause();
+                alarm.currentTime = 0;
+                isAudioEnabled = true;
+                
+                // Update UI
+                enableAudioBtn.innerHTML = '<span class="icon">✅</span> Alarm Aktif';
+                enableAudioBtn.disabled = true;
+                enableAudioBtn.classList.remove('btn-primary');
+                enableAudioBtn.classList.add('btn-success');
+                
+                updateSystemStatus('Sistem Aktif', 'success');
+                detectionStatus.textContent = 'SIAP';
+                detectionStatus.style.color = 'var(--success)';
+                
+                // Aktifkan tombol simulasi
+                simulateBtn.disabled = false;
+                faceDetectionStatus.textContent = 'Aktif';
+                faceDetectionStatus.style.color = 'var(--success)';
+                
+            }).catch(error => {
+                alert("Gagal memuat audio. Pastikan file beep-alarm.mp3 ada di folder static/audio/");
+                console.error('Audio error:', error);
+            });
+        });
+        
+        // Update system status
+        function updateSystemStatus(text, type = 'info') {
+            statusText.textContent = text;
+            
+            if (type === 'success') {
+                statusDot.className = 'status-dot';
+            } else if (type === 'warning') {
+                statusDot.className = 'status-dot warning';
+            } else if (type === 'danger') {
+                statusDot.className = 'status-dot danger';
+            }
+        }
+        
+        // Simulation Button
+        simulateBtn.addEventListener('click', () => {
+            if (isSimulating) return;
+            
+            isSimulating = true;
+            simulateBtn.disabled = true;
+            simulateBtn.innerHTML = '<span class="icon">⏳</span> Simulasi Berjalan...';
+            
+            // Simulasi status mengantuk
+            triggerDrowsyDetection(true);
+            
+            // Set timeout untuk kembali normal setelah 5 detik
+            simulationTimeout = setTimeout(() => {
+                triggerDrowsyDetection(false);
+                isSimulating = false;
+                simulateBtn.disabled = false;
+                simulateBtn.innerHTML = '<span class="icon">👁️</span> Simulasi Deteksi Kantuk';
+            }, 5000);
+        });
+        
+        // Reset Statistics
+        resetStatsBtn.addEventListener('click', () => {
+            frameCount.textContent = '0';
+            drowsyCount.textContent = '0';
+            totalDrowsyDetections = 0;
+            sessionStartTime = Date.now();
+            updateSessionTime();
+            
+            // Show notification
+            updateSystemStatus('Statistik direset', 'warning');
+            setTimeout(() => updateSystemStatus('Sistem Aktif', 'success'), 2000);
+        });
+        
+        // Trigger drowsy detection
+        function triggerDrowsyDetection(isDrowsy) {
+            lastResponseTime = Date.now();
+            
+            if (isDrowsy) {
+                // Status mengantuk
+                updateSystemStatus('BAHAYA: MENGANTUK', 'danger');
+                detectionStatus.textContent = 'MENGANTUK';
+                detectionStatus.style.color = 'var(--danger)';
+                
+                // Tampilkan alert
+                alertPanel.classList.add('active');
+                
+                // Update EAR value untuk simulasi
+                earValue.textContent = '0.18';
+                earValue.style.color = 'var(--danger)';
+                
+                // Update drowsy count
+                totalDrowsyDetections++;
+                drowsyCount.textContent = totalDrowsyDetections;
+                accuracyScore.textContent = '95%';
+                accuracyScore.style.color = 'var(--success)';
+                
+                // Mainkan alarm jika audio diaktifkan
+                if (isAudioEnabled && alarm.paused) {
+                    alarm.play().catch(e => console.error('Alarm play error:', e));
+                }
+                
+            } else {
+                // Status normal
+                updateSystemStatus('Sistem Aktif', 'success');
+                detectionStatus.textContent = 'WASPADA';
+                detectionStatus.style.color = 'var(--warning)';
+                
+                // Sembunyikan alert
+                alertPanel.classList.remove('active');
+                
+                // Stop alarm
+                alarm.pause();
+                alarm.currentTime = 0;
+                
+                // Reset EAR value
+                earValue.textContent = '0.28';
+                earValue.style.color = 'var(--success)';
+            }
+        }
+        
+        // Polling untuk status real dari server
+        function pollServerStatus() {
+            if (!isAudioEnabled) {
+                setTimeout(pollServerStatus, 1000);
+                return;
+            }
+            
+            fetch('/status_feed')
+                .then(response => response.json())
+                .then(data => {
+                    if (!isSimulating) { // Hanya update jika tidak sedang simulasi
+                        if (data.drowsy !== undefined) {
+                            triggerDrowsyDetection(data.drowsy);
+                        }
+                    }
+                    
+                    // Update EAR value dari server jika tersedia
+                    if (data.ear !== undefined) {
+                        earValue.textContent = data.ear.toFixed(2);
+                        earValue.style.color = data.ear < 0.22 ? 'var(--danger)' : 'var(--success)';
+                    }
+                    
+                    // Poll lagi setelah 500ms
+                    setTimeout(pollServerStatus, 500);
+                })
+                .catch(error => {
+                    console.error('Error polling server:', error);
+                    setTimeout(pollServerStatus, 1000);
+                });
+        }
+        
+        // Handle video feed
+        videoFeed.onerror = function() {
+            updateSystemStatus('Error: Video feed tidak tersedia', 'danger');
+        };
+        
+        videoFeed.onload = function() {
+            updateSystemStatus('Video feed aktif', 'success');
+        };
+        
+        // Start systems
+        initMetrics();
+        pollServerStatus();
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (simulationTimeout) {
+                clearTimeout(simulationTimeout);
+            }
+            alarm.pause();
+        });
+    </script>
+</body>
+</html>
