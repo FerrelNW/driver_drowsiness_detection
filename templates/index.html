@@ -1,10 +1,9 @@
- <!-- new ui design -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Drowsiness Detection System</title>
+    <title>Deep Learning Drowsiness Detection System</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -61,6 +60,17 @@
             color: var(--text-secondary);
             font-size: 1rem;
         }
+
+        .tech-badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            margin: 8px 4px 0;
+            color: #60a5fa;
+        }
         
         .dashboard {
             display: flex;
@@ -74,7 +84,6 @@
             }
         }
         
-        /* Camera Section - Lebih Luas */
         .camera-section {
             flex: 2;
             display: flex;
@@ -180,6 +189,7 @@
             padding: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(0, 0, 0, 0.2);
+            flex-wrap: wrap;
         }
         
         .stat-item {
@@ -198,7 +208,6 @@
             font-size: 0.9rem;
         }
         
-        /* Controls Section - Lebih Compact */
         .controls-section {
             flex: 1;
             display: flex;
@@ -274,16 +283,6 @@
             transform: translateY(-2px);
         }
         
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-        
-        .btn-warning:hover:not(:disabled) {
-            background: #d97706;
-            transform: translateY(-2px);
-        }
-        
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -291,7 +290,6 @@
             box-shadow: none !important;
         }
         
-        /* Metrics Grid */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -325,7 +323,6 @@
             color: var(--text-secondary);
         }
         
-        /* Alert Panel */
         .alert-panel {
             background: rgba(239, 68, 68, 0.1);
             border-radius: 8px;
@@ -367,7 +364,6 @@
             line-height: 1.5;
         }
         
-        /* Footer */
         footer {
             text-align: center;
             padding: 20px;
@@ -380,96 +376,68 @@
         .icon {
             font-size: 1.2rem;
         }
-        
-        .small-icon {
-            font-size: 1rem;
-        }
-        
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🚗 Driver Drowsiness Detection System</h1>
-            <p class="subtitle">Sistem monitoring real-time untuk keselamatan pengemudi</p>
+            <h1>🚗 Deep Learning Drowsiness Detection</h1>
+            <p class="subtitle">MobileNetV2 + Bidirectional GRU - Pure Visual Learning (No MAR Dependency)</p>
+            <div>
+                <span class="tech-badge">🧠 TensorFlow/Keras</span>
+                <span class="tech-badge">📱 MobileNetV2</span>
+                <span class="tech-badge">🔄 Bidirectional GRU</span>
+                <span class="tech-badge">👁️ Sequence-based Detection</span>
+            </div>
         </header>
         
         <div class="dashboard">
-            <!-- Camera Section (Lebih Luas) -->
             <div class="camera-section">
                 <div class="camera-container">
                     <div class="camera-header">
                         <h2><span class="icon">📷</span> Live Camera Feed</h2>
                         <div class="camera-status">
                             <div class="status-dot" id="statusDot"></div>
-                            <span id="statusText">Memulai sistem...</span>
+                            <span id="statusText">Initializing system...</span>
                         </div>
                     </div>
                     
                     <div class="camera-feed">
                         <img src="{{ url_for('video_feed') }}" alt="Live Camera Feed" id="videoFeed">
-                        <div class="camera-overlay">
-                            <div class="stat-item">
-                                <span class="stat-label">Resolusi:</span>
-                                <span class="stat-value" id="resolutionInfo">640x480</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">FPS:</span>
-                                <span class="stat-value" id="fpsCounter">0</span>
-                            </div>
-                        </div>
                     </div>
                     
                     <div class="performance-stats">
                         <div class="stat-item">
-                            <span class="stat-label">Frame diproses:</span>
-                            <span class="stat-value" id="frameCount">0</span>
+                            <span class="stat-label">Model Confidence:</span>
+                            <span class="stat-value" id="confidenceValue">0.00%</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Deteksi wajah:</span>
-                            <span class="stat-value" id="faceDetectionStatus">Tidak aktif</span>
+                            <span class="stat-label">Buffer Status:</span>
+                            <span class="stat-value" id="bufferStatus">0/12</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Waktu respon:</span>
-                            <span class="stat-value" id="responseTime">0ms</span>
+                            <span class="stat-label">Total Predictions:</span>
+                            <span class="stat-value" id="totalPredictions">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Face Detection:</span>
+                            <span class="stat-value" id="faceStatus">Inactive</span>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Alert Panel di bawah camera -->
                 <div id="alertPanel" class="alert-panel">
                     <div class="alert-header">
                         <span class="alert-icon">⚠️</span>
                         <strong>PERINGATAN: KANTUK TERDETEKSI!</strong>
                     </div>
                     <div class="alert-content">
-                        Sistem mendeteksi tanda-tanda kelelahan pada pengemudi. Alarm akan berbunyi untuk memberikan peringatan.
+                        Model deep learning mendeteksi pola visual mengantuk dari sequence frame. Segera istirahat!
                     </div>
                 </div>
             </div>
             
-            <!-- Controls Section (Compact di Kanan) -->
             <div class="controls-section">
-                <!-- System Control Card -->
                 <div class="control-card">
                     <h2><span class="icon">⚙️</span> Kontrol Sistem</h2>
                     
@@ -479,171 +447,114 @@
                             <span class="icon">🔊</span> Aktifkan Sistem Alarm
                         </button>
                         <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 8px;">
-                            Klik untuk mengizinkan pemutaran alarm otomatis saat terdeteksi kantuk.
+                            Klik untuk mengizinkan pemutaran alarm otomatis saat model mendeteksi kantuk.
                         </p>
                     </div>
                     
                     <div class="control-group">
                         <h3>Status Deteksi</h3>
                         <div class="metric-card">
-                            <div class="metric-value" id="detectionStatus">- -</div>
-                            <div class="metric-label">Status Saat Ini</div>
+                            <div class="metric-value" id="detectionStatus">INITIALIZING</div>
+                            <div class="metric-label">Status Model</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Metrics Card -->
                 <div class="control-card">
-                    <h2><span class="icon">📊</span> Metrics</h2>
+                    <h2><span class="icon">📊</span> Model Metrics</h2>
                     
                     <div class="metrics-grid">
                         <div class="metric-card">
-                            <div class="metric-value" id="earValue">0.00</div>
-                            <div class="metric-label">EAR Score</div>
-                        </div>
-                        <div class="metric-card">
                             <div class="metric-value" id="drowsyCount">0</div>
-                            <div class="metric-label">Deteksi Kantuk</div>
+                            <div class="metric-label">Drowsy Detections</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-value" id="sessionTime">0s</div>
-                            <div class="metric-label">Durasi Session</div>
+                            <div class="metric-label">Session Duration</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="modelStatus">✓</div>
+                            <div class="metric-label">Model Status</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-value" id="accuracyScore">-</div>
-                            <div class="metric-label">Akurasi</div>
+                            <div class="metric-label">Alert Rate</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Testing Card -->
                 <div class="control-card">
-                    <h2><span class="icon">🧪</span> Testing & Simulasi</h2>
-                    
-                    <div class="control-group">
-                        <button id="simulateDrowsyBtn" class="btn btn-warning" disabled>
-                            <span class="icon">👁️</span> Simulasi Deteksi Kantuk
-                        </button>
-                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 8px;">
-                            Uji sistem dengan simulasi kondisi mengantuk selama 5 detik.
+                    <h2><span class="icon">ℹ️</span> Model Info</h2>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                        <p><strong>Architecture:</strong> MobileNetV2 + Bi-GRU</p>
+                        <p><strong>Input:</strong> 12 frames @ 128x128 RGB</p>
+                        <p><strong>Sequence Length:</strong> ~2 seconds @ 6 FPS</p>
+                        <p><strong>Detection Method:</strong> Pure visual learning</p>
+                        <p style="margin-top: 12px; color: #60a5fa;">
+                            ✨ Model tidak menggunakan MAR calculation - 100% end-to-end visual learning!
                         </p>
-                    </div>
-                    
-                    <div class="control-group">
-                        <button id="resetStatsBtn" class="btn">
-                            <span class="icon">🔄</span> Reset Statistik
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>Driver Drowsiness Detection System © 2024 | Prototype untuk Tugas Akhir Deep Learning</p>
-            <p style="margin-top: 5px; font-size: 0.8rem; opacity: 0.7;">Sistem menggunakan MediaPipe Face Mesh untuk deteksi EAR (Eye Aspect Ratio)</p>
+            <p>Deep Learning Drowsiness Detection System © 2024</p>
+            <p style="margin-top: 5px; font-size: 0.8rem; opacity: 0.7;">
+                Production-ready deployment dengan MobileNetV2 + Bidirectional GRU
+            </p>
         </footer>
     </div>
 
     <audio id="alarmSound" loop>
         <source src="{{ url_for('static', filename='audio/beep-alarm.mp3') }}" type="audio/mpeg">
-        Browser Anda tidak mendukung elemen audio.
     </audio>
 
     <script>
-        // Elements
         const alarm = document.getElementById('alarmSound');
         const enableAudioBtn = document.getElementById('enableAudioBtn');
-        const simulateBtn = document.getElementById('simulateDrowsyBtn');
-        const resetStatsBtn = document.getElementById('resetStatsBtn');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
         const detectionStatus = document.getElementById('detectionStatus');
-        const earValue = document.getElementById('earValue');
-        const frameCount = document.getElementById('frameCount');
-        const fpsCounter = document.getElementById('fpsCounter');
+        const confidenceValue = document.getElementById('confidenceValue');
+        const bufferStatus = document.getElementById('bufferStatus');
+        const totalPredictions = document.getElementById('totalPredictions');
+        const faceStatus = document.getElementById('faceStatus');
         const alertPanel = document.getElementById('alertPanel');
-        const videoFeed = document.getElementById('videoFeed');
-        const resolutionInfo = document.getElementById('resolutionInfo');
-        const faceDetectionStatus = document.getElementById('faceDetectionStatus');
-        const responseTime = document.getElementById('responseTime');
         const drowsyCount = document.getElementById('drowsyCount');
         const sessionTime = document.getElementById('sessionTime');
         const accuracyScore = document.getElementById('accuracyScore');
         
-        // State
         let isAudioEnabled = false;
-        let frameCounter = 0;
-        let lastUpdateTime = Date.now();
-        let fps = 0;
-        let isSimulating = false;
-        let simulationTimeout = null;
         let sessionStartTime = Date.now();
-        let totalDrowsyDetections = 0;
-        let lastResponseTime = Date.now();
-        
-        // Initialize metrics
-        function initMetrics() {
-            updateSessionTime();
-            setInterval(updateSessionTime, 1000);
-            updateFPSCounter();
-        }
         
         // Update session time
-        function updateSessionTime() {
-            const elapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
-            sessionTime.textContent = `${elapsedSeconds}s`;
-        }
+        setInterval(() => {
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            sessionTime.textContent = `${elapsed}s`;
+        }, 1000);
         
-        // FPS Counter
-        function updateFPSCounter() {
-            frameCounter++;
-            const now = Date.now();
-            const elapsed = now - lastUpdateTime;
-            
-            if (elapsed >= 500) {
-                fps = Math.round((frameCounter * 1000) / elapsed);
-                fpsCounter.textContent = fps;
-                frameCount.textContent = parseInt(frameCount.textContent) + frameCounter;
-                frameCounter = 0;
-                lastUpdateTime = now;
-            }
-            
-            // Update response time
-            const currentResponseTime = Date.now() - lastResponseTime;
-            responseTime.textContent = `${currentResponseTime}ms`;
-            
-            requestAnimationFrame(updateFPSCounter);
-        }
-        
-        // Enable Audio System
+        // Enable audio
         enableAudioBtn.addEventListener('click', () => {
             alarm.play().then(() => {
                 alarm.pause();
                 alarm.currentTime = 0;
                 isAudioEnabled = true;
                 
-                // Update UI
                 enableAudioBtn.innerHTML = '<span class="icon">✅</span> Alarm Aktif';
                 enableAudioBtn.disabled = true;
                 enableAudioBtn.classList.remove('btn-primary');
                 enableAudioBtn.classList.add('btn-success');
                 
-                updateSystemStatus('Sistem Aktif', 'success');
-                detectionStatus.textContent = 'SIAP';
+                updateSystemStatus('System Active', 'success');
+                detectionStatus.textContent = 'READY';
                 detectionStatus.style.color = 'var(--success)';
-                
-                // Aktifkan tombol simulasi
-                simulateBtn.disabled = false;
-                faceDetectionStatus.textContent = 'Aktif';
-                faceDetectionStatus.style.color = 'var(--success)';
-                
             }).catch(error => {
                 alert("Gagal memuat audio. Pastikan file beep-alarm.mp3 ada di folder static/audio/");
                 console.error('Audio error:', error);
             });
         });
         
-        // Update system status
         function updateSystemStatus(text, type = 'info') {
             statusText.textContent = text;
             
@@ -656,109 +567,56 @@
             }
         }
         
-        // Simulation Button
-        simulateBtn.addEventListener('click', () => {
-            if (isSimulating) return;
-            
-            isSimulating = true;
-            simulateBtn.disabled = true;
-            simulateBtn.innerHTML = '<span class="icon">⏳</span> Simulasi Berjalan...';
-            
-            // Simulasi status mengantuk
-            triggerDrowsyDetection(true);
-            
-            // Set timeout untuk kembali normal setelah 5 detik
-            simulationTimeout = setTimeout(() => {
-                triggerDrowsyDetection(false);
-                isSimulating = false;
-                simulateBtn.disabled = false;
-                simulateBtn.innerHTML = '<span class="icon">👁️</span> Simulasi Deteksi Kantuk';
-            }, 5000);
-        });
-        
-        // Reset Statistics
-        resetStatsBtn.addEventListener('click', () => {
-            frameCount.textContent = '0';
-            drowsyCount.textContent = '0';
-            totalDrowsyDetections = 0;
-            sessionStartTime = Date.now();
-            updateSessionTime();
-            
-            // Show notification
-            updateSystemStatus('Statistik direset', 'warning');
-            setTimeout(() => updateSystemStatus('Sistem Aktif', 'success'), 2000);
-        });
-        
-        // Trigger drowsy detection
-        function triggerDrowsyDetection(isDrowsy) {
-            lastResponseTime = Date.now();
-            
-            if (isDrowsy) {
-                // Status mengantuk
-                updateSystemStatus('BAHAYA: MENGANTUK', 'danger');
-                detectionStatus.textContent = 'MENGANTUK';
+        function triggerDrowsyDetection(status) {
+            if (status.drowsy) {
+                updateSystemStatus('DROWSY DETECTED', 'danger');
+                detectionStatus.textContent = 'DROWSY';
                 detectionStatus.style.color = 'var(--danger)';
-                
-                // Tampilkan alert
                 alertPanel.classList.add('active');
                 
-                // Update EAR value untuk simulasi
-                earValue.textContent = '0.18';
-                earValue.style.color = 'var(--danger)';
-                
-                // Update drowsy count
-                totalDrowsyDetections++;
-                drowsyCount.textContent = totalDrowsyDetections;
-                accuracyScore.textContent = '95%';
-                accuracyScore.style.color = 'var(--success)';
-                
-                // Mainkan alarm jika audio diaktifkan
                 if (isAudioEnabled && alarm.paused) {
                     alarm.play().catch(e => console.error('Alarm play error:', e));
                 }
-                
             } else {
-                // Status normal
-                updateSystemStatus('Sistem Aktif', 'success');
-                detectionStatus.textContent = 'WASPADA';
-                detectionStatus.style.color = 'var(--warning)';
+                if (status.face_detected) {
+                    updateSystemStatus('Monitoring Active', 'success');
+                    detectionStatus.textContent = 'ALERT';
+                    detectionStatus.style.color = 'var(--success)';
+                } else {
+                    updateSystemStatus('No Face Detected', 'warning');
+                    detectionStatus.textContent = 'NO FACE';
+                    detectionStatus.style.color = 'var(--warning)';
+                }
                 
-                // Sembunyikan alert
                 alertPanel.classList.remove('active');
-                
-                // Stop alarm
                 alarm.pause();
                 alarm.currentTime = 0;
-                
-                // Reset EAR value
-                earValue.textContent = '0.28';
-                earValue.style.color = 'var(--success)';
+            }
+            
+            // Update metrics
+            confidenceValue.textContent = `${(status.confidence * 100).toFixed(1)}%`;
+            confidenceValue.style.color = status.drowsy ? 'var(--danger)' : 'var(--success)';
+            
+            bufferStatus.textContent = `${status.buffer_size}/12`;
+            totalPredictions.textContent = status.total_predictions;
+            drowsyCount.textContent = status.drowsy_count;
+            
+            faceStatus.textContent = status.face_detected ? 'Active' : 'Inactive';
+            faceStatus.style.color = status.face_detected ? 'var(--success)' : 'var(--warning)';
+            
+            if (status.total_predictions > 0) {
+                const alertRate = ((status.total_predictions - status.drowsy_count) / status.total_predictions * 100).toFixed(1);
+                accuracyScore.textContent = `${alertRate}%`;
+                accuracyScore.style.color = alertRate > 90 ? 'var(--success)' : 'var(--warning)';
             }
         }
         
-        // Polling untuk status real dari server
+        // Poll server status
         function pollServerStatus() {
-            if (!isAudioEnabled) {
-                setTimeout(pollServerStatus, 1000);
-                return;
-            }
-            
             fetch('/status_feed')
                 .then(response => response.json())
                 .then(data => {
-                    if (!isSimulating) { // Hanya update jika tidak sedang simulasi
-                        if (data.drowsy !== undefined) {
-                            triggerDrowsyDetection(data.drowsy);
-                        }
-                    }
-                    
-                    // Update EAR value dari server jika tersedia
-                    if (data.ear !== undefined) {
-                        earValue.textContent = data.ear.toFixed(2);
-                        earValue.style.color = data.ear < 0.22 ? 'var(--danger)' : 'var(--success)';
-                    }
-                    
-                    // Poll lagi setelah 500ms
+                    triggerDrowsyDetection(data);
                     setTimeout(pollServerStatus, 500);
                 })
                 .catch(error => {
@@ -767,26 +625,8 @@
                 });
         }
         
-        // Handle video feed
-        videoFeed.onerror = function() {
-            updateSystemStatus('Error: Video feed tidak tersedia', 'danger');
-        };
-        
-        videoFeed.onload = function() {
-            updateSystemStatus('Video feed aktif', 'success');
-        };
-        
-        // Start systems
-        initMetrics();
+        // Start polling
         pollServerStatus();
-        
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (simulationTimeout) {
-                clearTimeout(simulationTimeout);
-            }
-            alarm.pause();
-        });
     </script>
 </body>
 </html>
