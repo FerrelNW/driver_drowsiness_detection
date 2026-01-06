@@ -1,8 +1,7 @@
 flask
-tensorflow
-tf_keras
 opencv-python
 numpy<2.0.0
+tensorflow==2.16.2
 dlib
 pillow
 gunicorn
